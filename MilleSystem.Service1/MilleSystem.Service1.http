@@ -1,0 +1,6 @@
+@MilleSystem.Service1_HostAddress = http://localhost:5156
+
+GET {{MilleSystem.Service1_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
