@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36202.13 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilleSystem.Service1", "MilleSystem.Service1\MilleSystem.Service1.csproj", "{39CE9052-70FC-4BB1-8A8E-2534983EBFDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilleSystem.Service2", "MilleSystem.Service2\MilleSystem.Service2.csproj", "{6EE7E2CA-9653-425E-BCBD-7E973C1A8996}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{39CE9052-70FC-4BB1-8A8E-2534983EBFDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39CE9052-70FC-4BB1-8A8E-2534983EBFDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39CE9052-70FC-4BB1-8A8E-2534983EBFDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EE7E2CA-9653-425E-BCBD-7E973C1A8996}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EE7E2CA-9653-425E-BCBD-7E973C1A8996}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EE7E2CA-9653-425E-BCBD-7E973C1A8996}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EE7E2CA-9653-425E-BCBD-7E973C1A8996}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
