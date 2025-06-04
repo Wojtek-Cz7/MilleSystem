@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-// Definicja typu dla ksiπøki zgodna z modelem z backend'u
 interface Book {
     id: string;
     title: string;
@@ -15,13 +14,12 @@ function App() {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Funkcja do pobierania danych
     const fetchBooks = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // URL do Service 2 - endpoint GetAll
+            // IN REAL WORLD - TO CONFIGURATION, NOT HARDCODED URL
             const response = await fetch('http://localhost:5002/Book/GetAll');
 
             if (!response.ok) {
@@ -30,8 +28,6 @@ function App() {
 
             const data = await response.json();
             setBooks(data);
-
-            // Zapisujemy dane w localStorage, øeby mÛc je odczytaÊ po odúwieøeniu (F5)
             localStorage.setItem('books', JSON.stringify(data));
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -41,15 +37,11 @@ function App() {
         }
     };
 
-    // Wykonaj przy pierwszym renderowaniu
     useEffect(() => {
-        // Sprawdü najpierw localStorage
         const savedBooks = localStorage.getItem('books');
         if (savedBooks) {
             setBooks(JSON.parse(savedBooks));
         }
-
-        // Pobierz úwieøe dane z API
         fetchBooks();
     }, []);
 

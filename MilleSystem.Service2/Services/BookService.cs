@@ -35,18 +35,15 @@ public class BookService : IBookService
 
     public async Task<List<Book>> GetAllBooksAsync()
     {
-        // Najpierw sprawdzamy, czy dane s¹ ju¿ w cache
         if (_cache.TryGetValue(CacheKey, out List<Book> cachedBooks))
         {
             _logger.LogInformation("Returning books from cache");
             return cachedBooks;
         }
 
-        // Jeœli nie ma danych w cache, pobieramy je z Service 1
         _logger.LogInformation("Cache miss - retrieving data from Service 1");
         var books = await GetBooksFromService1();
 
-        // Zapisujemy dane do cache
         var cacheEntryOptions = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(_cacheDuration);
 
