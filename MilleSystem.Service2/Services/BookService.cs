@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using MilleSystem.Service2.Models;
 using System.Text.Json;
 
@@ -9,6 +9,9 @@ public class BookService : IBookService
     private readonly ILogger<BookService> _logger;
     private readonly HttpClient _httpClient;
     private readonly string _service1BaseUrl;
+    private readonly IMemoryCache _cache;
+    private const string CacheKey = "BooksList";
+    private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
 
     private class TaskResponse
     {
@@ -21,15 +24,39 @@ public class BookService : IBookService
         public bool IsCompleted { get; set; }
     }
 
-    public BookService(ILogger<BookService> logger, IConfiguration configuration, HttpClient httpClient)
+    public BookService(ILogger<BookService> logger, IConfiguration configuration, HttpClient httpClient, IMemoryCache cache)
     {
         _logger = logger;
         _httpClient = httpClient;
+        _cache = cache;
 
         _service1BaseUrl = configuration["ServiceUrls:Service1"] ?? throw new ArgumentException("Service1 URL not configured");
     }
 
     public async Task<List<Book>> GetAllBooksAsync()
+    {
+        // Najpierw sprawdzamy, czy dane s¹ ju¿ w cache
+        if (_cache.TryGetValue(CacheKey, out List<Book> cachedBooks))
+        {
+            _logger.LogInformation("Returning books from cache");
+            return cachedBooks;
+        }
+
+        // Jeœli nie ma danych w cache, pobieramy je z Service 1
+        _logger.LogInformation("Cache miss - retrieving data from Service 1");
+        var books = await GetBooksFromService1();
+
+        // Zapisujemy dane do cache
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(_cacheDuration);
+
+        _cache.Set(CacheKey, books, cacheEntryOptions);
+        _logger.LogInformation($"Data cached for {_cacheDuration.TotalMinutes} minutes");
+
+        return books;
+    }
+
+    private async Task<List<Book>> GetBooksFromService1()
     {
         try
         {
@@ -37,7 +64,7 @@ public class BookService : IBookService
 
             // Krok 1: Zainicjuj zadanie w Serwisie 1
             var initResponse = await _httpClient.GetAsync($"{_service1BaseUrl}/Book/GetAll");
-            
+
             if (!initResponse.IsSuccessStatusCode)
             {
                 var errorContent = await initResponse.Content.ReadAsStringAsync();
@@ -47,7 +74,7 @@ public class BookService : IBookService
 
             // Deserializuj odpowiedŸ, aby uzyskaæ TaskId
             var responseContent = await initResponse.Content.ReadAsStringAsync();
-            var taskInfo = JsonSerializer.Deserialize<TaskResponse>(responseContent, 
+            var taskInfo = JsonSerializer.Deserialize<TaskResponse>(responseContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (taskInfo == null || taskInfo.TaskId == Guid.Empty)
@@ -64,7 +91,7 @@ public class BookService : IBookService
             while (!isCompleted)
             {
                 _logger.LogInformation($"Checking status of task {taskId}");
-                
+
                 var statusResponse = await _httpClient.GetAsync($"{_service1BaseUrl}/Book/Status/{taskId}");
                 if (!statusResponse.IsSuccessStatusCode)
                 {
@@ -74,7 +101,7 @@ public class BookService : IBookService
                 }
 
                 var statusContent = await statusResponse.Content.ReadAsStringAsync();
-                var statusInfo = JsonSerializer.Deserialize<TaskStatusResponse>(statusContent, 
+                var statusInfo = JsonSerializer.Deserialize<TaskStatusResponse>(statusContent,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (statusInfo != null && statusInfo.IsCompleted)
@@ -99,7 +126,7 @@ public class BookService : IBookService
             }
 
             var resultContent = await resultResponse.Content.ReadAsStringAsync();
-            var books = JsonSerializer.Deserialize<List<Book>>(resultContent, 
+            var books = JsonSerializer.Deserialize<List<Book>>(resultContent,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             _logger.LogInformation($"Successfully retrieved {books?.Count ?? 0} books from Service 1");
