@@ -1,3 +1,5 @@
+using MilleSystem.Service2.Services;
+
 namespace MilleSystem.Service2;
 
 public class Program
@@ -8,9 +10,12 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddControllers();
-        
-        // Dodanie HttpClient jako us³ugi
+  
         builder.Services.AddHttpClient();
+
+        builder.Services.AddMemoryCache();        
+
+        builder.Services.AddScoped<IBookService, BookService>();
         
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
